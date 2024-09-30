@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Navigate to your Django project directory
+cd "/c/Users/MSI-Leopard GL73/Desktop/coding/regc3"
+
+# Check if the server is running by making an HTTP request
+if ! curl --silent --head http://localhost:8000 | grep "200 OK" > /dev/null; then
+    echo "The server is OFF. Starting the Django server..."
+    nohup python manage.py runserver &> /dev/null &
+    
+    # Wait a few seconds to ensure the server has started
+    sleep 5
+fi
+
+# Check if localhost:8000 is already open in Microsoft Edge using PowerShell
+echo "Checking if localhost:8000 is already open in Microsoft Edge..."
+powershell -command "
+$localhost_open = \$false
+\$edgeProcesses = Get-Process msedge -ErrorAction SilentlyContinue
+
+foreach (\$process in \$edgeProcesses) {
+    \$shell = New-Object -ComObject Shell.Application
+    foreach (\$window in \$shell.Windows()) {
+        if (\$window.FullName -like '*msedge*' -and \$window.LocationURL -like '*localhost:8000*') {
+            \$localhost_open = \$true
+            break
+        }
+    }
+}
+
+if (-not \$localhost_open) {
+    Start-Process 'microsoft-edge:http://localhost:8000'
+    Write-Host 'Opening localhost:8000 in Microsoft Edge...'
+} else {
+    Write-Host 'localhost:8000 is already open in Microsoft Edge. No action needed.'
+}
+"
+
+echo "Finished script execution."
